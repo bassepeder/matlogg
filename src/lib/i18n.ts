@@ -291,8 +291,8 @@ const en = {
   'settings.deleteAll': 'Delete all data',
   'settings.deleteAllConfirm':
     'Delete all diary entries, foods, recipes and settings on this device? This cannot be undone. Export a backup first if you want to keep anything.',
-  'settings.importConfirm': 'Import {entries} diary entries and {foods} foods from {date}? Items with the same id are replaced.',
-  'settings.imported': 'Backup imported.',
+  'settings.importConfirm': 'Import {entries} diary entries and {foods} foods from {date}? They are added to what is already here; entries you already have are skipped. Settings and foods in the backup replace the ones here.',
+  'settings.imported': 'Backup imported: {added} entries added, {skipped} already here.',
   'settings.notBackup': 'This is not a Matlogg backup file.',
   'settings.mayClear': 'The browser may clear this data if the device runs low on space.',
   'settings.askKeep': 'Ask to keep it',
@@ -597,8 +597,8 @@ const nb: Record<MessageKey, string> = {
   'settings.deleteAllConfirm':
     'Slette alle dagbokføringer, matvarer, oppskrifter og innstillinger på denne enheten? Dette kan ikke angres. Eksporter en sikkerhetskopi først hvis du vil beholde noe.',
   'settings.importConfirm':
-    'Importere {entries} dagbokoppføringer og {foods} matvarer fra {date}? Elementer med samme id blir erstattet.',
-  'settings.imported': 'Sikkerhetskopien er importert.',
+    'Importere {entries} dagbokoppføringer og {foods} matvarer fra {date}? De legges til det som allerede er her; oppføringer du allerede har, hoppes over. Innstillinger og matvarer i sikkerhetskopien erstatter de som er her.',
+  'settings.imported': 'Sikkerhetskopien er importert: {added} oppføringer lagt til, {skipped} fantes allerede.',
   'settings.notBackup': 'Dette er ikke en sikkerhetskopi fra Matlogg.',
   'settings.mayClear': 'Nettleseren kan slette disse dataene hvis enheten får lite lagringsplass.',
   'settings.askKeep': 'Be om å beholde dem',

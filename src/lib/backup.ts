@@ -35,11 +35,19 @@ export function parseBackup(text: string): Backup {
   return { ...data, settings: data.settings ?? [] } as Backup;
 }
 
-export async function importBackup(backup: Backup): Promise<void> {
-  await db.transaction('rw', db.entries, db.foods, db.settings, async () => {
+// The same logged item on two devices: entry ids are only local counters, so they can't be used.
+const sameEntry = (e: Entry) => [e.date, e.meal, e.foodId, e.name, e.grams, e.createdAt].join('|');
+
+// Adds the backup's diary entries next to what is already on the device, skipping ones it already
+// has, so restoring onto a phone in use never overwrites newer entries. Foods are matched by id.
+export async function importBackup(backup: Backup): Promise<{ added: number; skipped: number }> {
+  return db.transaction('rw', db.entries, db.foods, db.settings, async () => {
     await db.foods.bulkPut(backup.foods);
-    await db.entries.bulkPut(backup.entries);
+    const have = new Set((await db.entries.toArray()).map(sameEntry));
+    const fresh = backup.entries.filter((e) => !have.has(sameEntry(e)) && have.add(sameEntry(e)));
+    await db.entries.bulkAdd(fresh.map(({ id: _id, ...e }) => e));
     if (backup.settings.length) await db.settings.bulkPut(backup.settings);
+    return { added: fresh.length, skipped: backup.entries.length - fresh.length };
   });
 }
 

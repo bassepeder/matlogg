@@ -12,6 +12,7 @@ export class LookupError extends Error {
     message: string,
     /** 'busy' means the service refused for now (rate limit, overload); worth backing off. */
     readonly kind: 'unreachable' | 'timeout' | 'http' | 'busy' = 'http',
+    readonly status?: number,
   ) {
     super(message);
   }
@@ -166,17 +167,17 @@ export async function searchOpenFoodFacts(query: string, limit = 15): Promise<Lo
 }
 
 export async function lookupOpenFoodFacts(ean: string): Promise<LookupResult | null> {
-  let res: Response;
+  let json: { status?: number; product?: OffProduct } | null;
   try {
-    res = await fetch(
+    json = await fetchJson(
       `https://world.openfoodfacts.org/api/v2/product/${encodeURIComponent(ean)}.json?fields=${OFF_FIELDS}`,
+      { unreachable: 'lookup.offUnreachable', timeout: 'lookup.offTimeout', error: 'lookup.offError' },
     );
-  } catch {
-    throw new LookupError(t('lookup.offUnreachable'));
+  } catch (e) {
+    // OFF answers an unknown barcode with 404 (and a JSON body); that is "not found", not a failure.
+    if (e instanceof LookupError && e.status === 404) return null;
+    throw e;
   }
-  if (res.status === 404) return null;
-  if (!res.ok) throw new LookupError(t('lookup.offError', { status: res.status }));
-  const json = await res.json();
   if (json?.status === 0 || !json?.product) return null;
   return parseOpenFoodFacts(ean, json.product);
 }
@@ -248,15 +249,23 @@ function vetduatGrams(amount: unknown, unit: unknown): number | undefined {
   return toGrams(amount, u);
 }
 
-export function parseVetduatProduct(product: VetduatProduct, proxyBase: string): LookupResult {
+// GTINs can come back as numbers, which drops leading zeros, so compare without them.
+const sameGtin = (a: unknown, b: string) => a != null && String(a).replace(/^0+/, '') === b.replace(/^0+/, '');
+
+// With `scanned`, reads the package with that barcode (a multipack and its single item are different
+// packages of one product) and keeps the scanned code, so the next scan finds it on the device.
+export function parseVetduatProduct(product: VetduatProduct, proxyBase: string, scanned?: string): LookupResult {
   const packages = product.pakninger ?? [];
-  const pkg = packages.find((p) => p.isBasispakning) ?? packages[0];
-  const ean = pkg?.gtin != null ? String(pkg.gtin) : '';
+  const pkg = scanned
+    ? packages.find((p) => sameGtin(p.gtin, scanned))
+    : (packages.find((p) => p.isBasispakning) ?? packages[0]);
+  const ean = scanned ?? (pkg?.gtin != null ? String(pkg.gtin) : '');
   const gln = pkg?.gln != null ? String(pkg.gln) : '';
   const nutrition = parseVetduatDeklarasjon(pkg?.deklarasjonListe);
   const name = (pkg?.markedsnavn || product.fellesProduktnavn || '').trim() || undefined;
   const brand = pkg?.varemerke?.trim() || pkg?.firmaNavn?.trim() || undefined;
-  const image = pkg?.harBilde && ean && gln ? `${proxyBase}/api/images/medium/${ean}/${gln}` : undefined;
+  const gtin = pkg?.gtin != null ? String(pkg.gtin) : '';
+  const image = pkg?.harBilde && gtin && gln ? `${proxyBase}/api/images/medium/${gtin}/${gln}` : undefined;
   const partial = {
     ean: ean || undefined,
     name,
@@ -307,7 +316,8 @@ async function fetchJson<T>(url: string, messages: FetchMessages, init?: Request
     } catch {
       throw failed();
     }
-    if (!res.ok) throw new LookupError(t(messages.error, { status: res.status }), res.status === 429 || res.status === 503 ? 'busy' : 'http');
+    if (!res.ok)
+      throw new LookupError(t(messages.error, { status: res.status }), res.status === 429 || res.status === 503 ? 'busy' : 'http', res.status);
     try {
       return (await res.json()) as T;
     } catch {
@@ -334,12 +344,15 @@ export async function lookupVetduat(ean: string, proxy: string): Promise<LookupR
   const search = await vetduatJson<{ products?: VetduatSearchProduct[] }>(base, '/api/products/search', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ search: ean, top: 1, skip: 0, count: true }),
+    body: JSON.stringify({ search: ean, top: 3, skip: 0, count: true }),
   });
-  const hit = (search?.products ?? []).find((p) => p.variantIdentityGuid);
-  if (!hit?.variantIdentityGuid) return null;
-  const product = await vetduatJson<VetduatProduct>(base, `/api/products/${encodeURIComponent(hit.variantIdentityGuid)}`);
-  return parseVetduatProduct(product, base);
+  // The search is a text search, so a hit is not necessarily this barcode: use the first product
+  // that actually has a package with it, and treat none as not found rather than log the wrong thing.
+  for (const hit of (search?.products ?? []).filter((p) => p.variantIdentityGuid)) {
+    const product = await vetduatJson<VetduatProduct>(base, `/api/products/${encodeURIComponent(hit.variantIdentityGuid!)}`);
+    if (product.pakninger?.some((p) => sameGtin(p.gtin, ean))) return parseVetduatProduct(product, base, ean);
+  }
+  return null;
 }
 
 // Text search: VetDuAt results carry no nutrition, so fetch each hit's product detail.

@@ -302,8 +302,8 @@ export function SettingsView() {
         }),
       );
       if (!ok) return;
-      await importBackup(backup);
-      setMessage({ card: 'data', text: t('settings.imported') });
+      const { added, skipped } = await importBackup(backup);
+      setMessage({ card: 'data', text: t('settings.imported', { added, skipped }) });
     } catch (e) {
       setMessage({ card: 'data', text: (e as Error).message, error: true });
     } finally {

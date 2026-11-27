@@ -1,6 +1,7 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import {
   lookupBarcode,
+  lookupOpenFoodFacts,
   lookupVetduat,
   parseOpenFoodFacts,
   parseVetduatDeklarasjon,
@@ -272,5 +273,65 @@ describe('lookupBarcode', () => {
       }),
     );
     await expect(lookupBarcode('7037610239097', 'https://proxy.test')).rejects.toThrow(/Could not reach/);
+  });
+});
+
+describe('barcode lookup matches the scanned code', () => {
+  afterEach(() => vi.unstubAllGlobals());
+  const multipack = {
+    ...vetduatProduct,
+    pakninger: [
+      { ...vetduatProduct.pakninger[0] },
+      { ...vetduatProduct.pakninger[0], gtin: 7039010019835, isBasispakning: false, markedsnavn: 'Grandiosa Pepperoni 3-pk' },
+    ],
+  };
+  const vetduat = (products: Record<string, unknown>) =>
+    vi.fn(async (url: string) =>
+      url.includes('/search') ? json({ products: Object.keys(products).map((g) => ({ variantIdentityGuid: g })) }) : json(products[url.split('/').pop()!]),
+    );
+
+  it('reads the package with the scanned barcode and saves it under that code', async () => {
+    vi.stubGlobal('fetch', vetduat({ g1: multipack }));
+    const r = await lookupVetduat('7039010019835', 'https://proxy.test');
+    expect(r?.food).toMatchObject({ id: 'ean:7039010019835', ean: '7039010019835', name: 'Grandiosa Pepperoni 3-pk' });
+  });
+
+  it('skips search hits that do not have the scanned barcode', async () => {
+    vi.stubGlobal('fetch', vetduat({ other: { ...vetduatProduct, pakninger: [{ ...vetduatProduct.pakninger[0], gtin: 123 }] }, g1: vetduatProduct }));
+    expect((await lookupVetduat('7039010019828', 'https://proxy.test'))?.food?.ean).toBe('7039010019828');
+  });
+
+  it('finds nothing rather than a different product', async () => {
+    vi.stubGlobal('fetch', vetduat({ other: { ...vetduatProduct, pakninger: [{ ...vetduatProduct.pakninger[0], gtin: 123 }] } }));
+    expect(await lookupVetduat('7039010019828', 'https://proxy.test')).toBeNull();
+  });
+
+  it('matches codes with a leading zero the service drops', async () => {
+    vi.stubGlobal('fetch', vetduat({ g1: { ...vetduatProduct, pakninger: [{ ...vetduatProduct.pakninger[0], gtin: 7039010019828 }] } }));
+    expect((await lookupVetduat('07039010019828', 'https://proxy.test'))?.food?.id).toBe('ean:07039010019828');
+  });
+});
+
+describe('Open Food Facts barcode lookup', () => {
+  afterEach(() => {
+    vi.unstubAllGlobals();
+    vi.useRealTimers();
+  });
+
+  it('treats an unknown barcode (404) as not found', async () => {
+    vi.stubGlobal('fetch', vi.fn(async () => json({ status: 0 }, 404)));
+    expect(await lookupOpenFoodFacts('123')).toBeNull();
+  });
+
+  it('gives up with a timeout error instead of waiting forever', async () => {
+    vi.useFakeTimers();
+    vi.stubGlobal(
+      'fetch',
+      vi.fn((_url: string, init?: RequestInit) => new Promise((_, reject) => init?.signal?.addEventListener('abort', () => reject(new Error('aborted'))))),
+    );
+    const p = lookupOpenFoodFacts('123');
+    const check = expect(p).rejects.toMatchObject({ kind: 'timeout' });
+    await vi.advanceTimersByTimeAsync(10_000);
+    await check;
   });
 });
