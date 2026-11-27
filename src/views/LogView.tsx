@@ -75,7 +75,8 @@ export function LogView(props: Props) {
   const [ready, setReady] = useState(false);
 
   useLayoutEffect(() => {
-    if (ready || !current || food === undefined || (editing && !loaded)) return;
+    // An entry without a food id (an ingredient from a shared recipe) has no food to wait for; it edits from its own values.
+    if (ready || !current || (food === undefined && !!foodId) || (editing && !loaded)) return;
     const pick = (label: string | undefined, grams?: number) =>
       units.findIndex((u) => u.label === label && (grams == null || Math.abs(u.grams - grams) < 0.01));
     if (entry) {
@@ -97,7 +98,7 @@ export function LogView(props: Props) {
       setQty('100');
     }
     setReady(true);
-  }, [ready, current, food, editing, loaded, entry, units, props.preset]);
+  }, [ready, current, food, foodId, editing, loaded, entry, units, props.preset]);
 
   if (editing && loaded && !entry) {
     return (

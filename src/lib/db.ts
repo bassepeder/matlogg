@@ -37,7 +37,8 @@ export async function recentFoods(scanLimit = 500): Promise<RecentFood[]> {
   const latest = await db.entries.orderBy('createdAt').reverse().limit(scanLimit).toArray();
   const byFood = new Map<string, RecentFood>();
   for (const entry of latest) {
-    if (entry.source === 'quick') continue;
+    // Quick adds and ingredients from shared recipes (no food id) have no food to log again.
+    if (entry.source === 'quick' || !entry.foodId) continue;
     const seen = byFood.get(entry.foodId);
     if (seen) seen.count++;
     else byFood.set(entry.foodId, { entry, count: 1 });

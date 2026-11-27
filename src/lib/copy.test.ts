@@ -1,6 +1,6 @@
 import 'fake-indexeddb/auto';
 import { describe, expect, it } from 'vitest';
-import { notYetCopied } from './db';
+import { db, notYetCopied, recentFoods } from './db';
 import type { Entry } from './types';
 
 const e = (foodId: string, grams: number): Entry => ({
@@ -31,5 +31,17 @@ describe('copy from yesterday', () => {
   it('offers nothing once all of it has been copied', () => {
     const y = [e('a', 60), e('b', 200)];
     expect(notYetCopied(y, y)).toEqual([]);
+  });
+});
+
+describe('recent foods', () => {
+  it('leaves out ingredients from shared recipes, which have no food to log again', async () => {
+    await db.entries.clear();
+    await db.entries.bulkAdd([
+      { ...e('mvt:1', 100), createdAt: 1 },
+      { ...e('', 50), name: 'Delt ingrediens A', createdAt: 2 },
+      { ...e('', 30), name: 'Delt ingrediens B', createdAt: 3 },
+    ]);
+    expect((await recentFoods()).map((r) => r.entry.foodId)).toEqual(['mvt:1']);
   });
 });
