@@ -20,8 +20,9 @@ const SITE = 'https://vetduat.no';
 // Product images rarely change: let browsers and Cloudflare's edge keep them for a week.
 const IMAGE_TTL = 7 * 24 * 60 * 60;
 
-// Optional: lock the proxy to your own app's origin(s). Empty array = allow any.
-const ALLOW_ORIGINS = [];
+// Lock the proxy to your own app's origin(s): scheme and host only, no path. Empty array = allow any.
+// Add e.g. 'http://localhost:5173' to use the proxy from a local dev server.
+const ALLOW_ORIGINS = ['https://bassepeder.github.io'];
 
 function corsHeaders(origin) {
   const allow = ALLOW_ORIGINS.length === 0 ? '*' : ALLOW_ORIGINS.includes(origin) ? origin : ALLOW_ORIGINS[0];
