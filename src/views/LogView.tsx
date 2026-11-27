@@ -17,8 +17,11 @@ import { QuickAddView } from './QuickAddView';
 
 export { unitsFor };
 
-function foodFromEntry(e: Entry): Food {
-  return { id: e.foodId, source: e.source === 'quick' ? 'custom' : e.source, name: e.name, brand: e.brand, per100: e.per100 };
+// Stands in for a food that no longer exists (deleted, or an ingredient from a shared recipe),
+// keeping the unit the entry was logged in so it can still be edited in that unit.
+export function foodFromEntry(e: Entry): Food {
+  const portions = e.unitLabel && e.unitGrams && e.unitGrams > 0 ? [{ label: e.unitLabel, grams: e.unitGrams }] : undefined;
+  return { id: e.foodId, source: e.source === 'quick' ? 'custom' : e.source, name: e.name, brand: e.brand, per100: e.per100, portions };
 }
 
 export function per100Values(food: Food) {

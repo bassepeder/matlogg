@@ -56,3 +56,14 @@ describe('copyEntries', () => {
     expect(await db.entries.where('date').equals('2026-11-25').count()).toBe(1);
   });
 });
+
+describe('editing an entry whose food is gone', () => {
+  it('keeps the unit it was logged in', async () => {
+    const { foodFromEntry } = await import('../views/LogView');
+    const food = foodFromEntry({
+      date: '2026-11-27', meal: 'lunch', foodId: '', name: 'Eple', source: 'matvaretabellen', grams: 75,
+      quantity: 0.5, unitLabel: 'stk', unitGrams: 150, per100: { kcal: 52, protein: 0.3, carbs: 11, fat: 0.2 }, createdAt: 1,
+    });
+    expect(unitsFor(food).map((u) => u.label)).toContain('stk');
+  });
+});
