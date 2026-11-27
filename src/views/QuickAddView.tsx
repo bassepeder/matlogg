@@ -22,6 +22,7 @@ export function QuickAddView(props: { date?: string; meal?: MealId; entry?: Entr
   const macros = { protein: parseNum(protein), carbs: parseNum(carbs), fat: parseNum(fat) };
   const hasMacros = Object.values(macros).some((v) => v != null);
   const kcalValue = parseNum(kcal) ?? (hasMacros ? Math.round(kcalFromMacros(macros)) : undefined);
+  const negative = kcalValue != null && kcalValue < 0;
 
   async function save() {
     if (kcalValue == null || kcalValue < 0) return;
@@ -80,6 +81,7 @@ export function QuickAddView(props: { date?: string; meal?: MealId; entry?: Entr
               <input className="input" inputMode="decimal" value={fat} onChange={(ev) => setFat(ev.target.value)} />
             </label>
           </div>
+          {negative && <p className="notice error">{t('quick.errNegative')}</p>}
           <MealPicker label={t('meal.label')} value={meal} onChange={setMeal} options={mealOptions(meals, meal)} />
         </section>
         {e && (
@@ -89,7 +91,7 @@ export function QuickAddView(props: { date?: string; meal?: MealId; entry?: Entr
         )}
       </main>
       <div className="action-bar">
-        <button className="btn primary wide" disabled={kcalValue == null} onClick={save}>
+        <button className="btn primary wide" disabled={kcalValue == null || negative} onClick={save}>
           {e ? t('common.save') : t('quick.add', { kcal: kcalValue ?? 0 })}
         </button>
       </div>

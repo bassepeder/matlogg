@@ -98,6 +98,9 @@ export function FoodEditView({ id, query }: { id?: string; query: URLSearchParam
     if (!name) return setError(t('food.errName'));
     if (kcal == null) return setError(t('food.errKcal'));
     const ean = f.ean.replace(/\D/g, '') || undefined;
+    // A barcode belongs to one food, or scanning it would pick either at random.
+    const clash = ean ? await db.foods.where('ean').equals(ean).filter((x) => x.id !== existing?.id).first() : undefined;
+    if (clash) return setError(t('food.errBarcode', { name: clash.name }));
 
     const per100: Nutrients = {
       kcal,

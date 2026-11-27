@@ -150,6 +150,7 @@ const en = {
   'quick.fromMacros': '{kcal} from macros',
   'quick.carbs': 'Carbs (g)',
   'quick.add': 'Add {kcal} kcal',
+  'quick.errNegative': 'Calories can’t be negative.',
 
   'food.title': 'Food',
   'food.new': 'New food',
@@ -172,6 +173,7 @@ const en = {
   'food.confirmDelete': 'Delete “{name}”? Entries you already logged keep their values.',
   'food.errName': 'Give the food a name.',
   'food.errKcal': 'Enter the energy (kcal) per 100 g, or the macros.',
+  'food.errBarcode': 'This barcode is already used by “{name}”. Edit that food instead, or clear the barcode here.',
   'food.saveContinue': 'Save and continue',
   'food.save': 'Save food',
 
@@ -454,6 +456,7 @@ const nb: Record<MessageKey, string> = {
   'quick.fromMacros': '{kcal} fra makroene',
   'quick.carbs': 'Karbo (g)',
   'quick.add': 'Legg til {kcal} kcal',
+  'quick.errNegative': 'Kalorier kan ikke være negative.',
 
   'food.title': 'Matvare',
   'food.new': 'Ny matvare',
@@ -476,6 +479,7 @@ const nb: Record<MessageKey, string> = {
   'food.confirmDelete': 'Slette «{name}»? Oppføringer du allerede har logget, beholder verdiene sine.',
   'food.errName': 'Gi matvaren et navn.',
   'food.errKcal': 'Legg inn energi (kcal) per 100 g, eller makroene.',
+  'food.errBarcode': 'Denne strekkoden brukes allerede av «{name}». Rediger den matvaren i stedet, eller fjern strekkoden her.',
   'food.saveContinue': 'Lagre og fortsett',
   'food.save': 'Lagre matvare',
 
