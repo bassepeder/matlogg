@@ -15,10 +15,11 @@ export function TopBar({ title, onBack, right }: { title: ReactNode; onBack?: ()
   );
 }
 
-export type Tab = 'diary' | 'foods' | 'settings';
+export type Tab = 'diary' | 'week' | 'foods' | 'settings';
 
-const TABS: { id: Tab; path: string; icon: 'diary' | 'foods' | 'settings' }[] = [
+const TABS: { id: Tab; path: string; icon: 'diary' | 'week' | 'foods' | 'settings' }[] = [
   { id: 'diary', path: '/', icon: 'diary' },
+  { id: 'week', path: '/week', icon: 'week' },
   { id: 'foods', path: '/foods', icon: 'foods' },
   { id: 'settings', path: '/settings', icon: 'settings' },
 ];

@@ -14,7 +14,7 @@ function readMode(): Mode {
   }
 }
 
-function Bar({ value, goal, kind }: { value: number; goal: number; kind: string }) {
+export function Bar({ value, goal, kind }: { value: number; goal: number; kind: string }) {
   const pct = goal > 0 ? Math.min(100, (value / goal) * 100) : 0;
   const over = goal > 0 && value > goal * 1.02;
   return (
