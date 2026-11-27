@@ -136,12 +136,18 @@ export function DiaryView({ date }: { date: string }) {
                       <li key={item[0].group} className="recipe-group">
                         <ul className="list">
                           <SwipeRow deleteLabel={t('diary.deleteRecipe', { name })} onDelete={() => remove(item, name)}>
-                            <div className="row group-head">
+                            <button
+                              className="row group-head"
+                              onClick={() => push(`/group/${date}/${encodeURIComponent(item[0].group!)}`)}
+                              aria-label={t('group.open', { name })}
+                            >
                               <span className="row-main">
                                 <span className="row-sub">{t('diary.fromRecipe', { name })}</span>
                               </span>
-                              <span className="row-sub">{fmtKcal(sum(item.map(entryNutrients)).kcal)} kcal</span>
-                            </div>
+                              <span className="row-sub">
+                                {fmtKcal(sum(item.map(entryNutrients)).kcal)} kcal <Icon name="next" size={14} />
+                              </span>
+                            </button>
                           </SwipeRow>
                           {item.map((e) => (
                             <EntryRow key={e.id} e={e} inGroup onDelete={() => remove([e], entryTitle(e))} />

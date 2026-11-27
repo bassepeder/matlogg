@@ -13,6 +13,7 @@ import { MyFoodsView } from './views/MyFoodsView';
 import { QuickAddView } from './views/QuickAddView';
 import { RecipeEditView } from './views/RecipeEditView';
 import { RecipesView } from './views/RecipesView';
+import { GroupView } from './views/GroupView';
 import { ScanView } from './views/ScanView';
 import { SettingsView } from './views/SettingsView';
 
@@ -47,6 +48,8 @@ function View() {
       );
     case 'entry':
       return <LogView key={a} entryId={Number(a)} />;
+    case 'group':
+      return <GroupView key={path} date={date} group={b ?? ''} />;
     case 'recipes':
       return <RecipesView key={path} date={date} meal={meal} />;
     case 'recipe':

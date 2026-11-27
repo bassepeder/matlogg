@@ -1509,3 +1509,7 @@ textarea {
 .row.in-group {
   padding-left: 28px;
 }
+
+.row.group-head .row-sub svg {
+  vertical-align: -2px;
+}

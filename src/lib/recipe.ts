@@ -73,3 +73,22 @@ export function recipeEntries(
     recipeName: recipe.name,
   }));
 }
+
+// How much of the dish a logged group amounts to, in grams of the finished recipe. Cooking can
+// change the weight, so the ingredient grams are converted with the recipe's own cooked/raw ratio.
+export function groupDishGrams(entries: Entry[], recipe?: Food): number {
+  const ingredientGrams = entries.reduce((g, e) => g + e.grams, 0);
+  const ings = recipe?.ingredients ?? [];
+  const raw = rawWeight(ings);
+  return raw > 0 ? (ingredientGrams * recipeWeight(ings, recipe?.cookedGrams)) / raw : ingredientGrams;
+}
+
+// Scales every line of a logged group by the same factor (keeping any one-off edits in proportion) and moves it to `meal`.
+export function scaleGroup(entries: Entry[], factor: number, meal: Entry['meal']): Entry[] {
+  return entries.map((e) => ({
+    ...e,
+    meal,
+    grams: e.grams * factor,
+    quantity: e.quantity != null ? e.quantity * factor : undefined,
+  }));
+}

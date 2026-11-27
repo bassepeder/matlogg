@@ -1,7 +1,7 @@
 import 'fake-indexeddb/auto';
 import { beforeEach, describe, expect, it } from 'vitest';
 import { copyEntries, db, recentFoods, recipeUsage } from './db';
-import { recipeEntries } from './recipe';
+import { groupDishGrams, recipeEntries, scaleGroup } from './recipe';
 import type { Entry, Food } from './types';
 import { groupEntries } from '../views/DiaryView';
 import { recentAmount } from '../views/AddView';
@@ -66,5 +66,23 @@ describe('recent foods from recipes', () => {
     expect(recentAmount(b)).toMatchObject({ quantity: 0.5, grams: 50 });
     const own = single('x', 1, 66.7);
     expect(recentAmount(own)).toBe(own);
+  });
+});
+
+describe('changing the amount of a logged recipe', () => {
+  it('works out how much of the dish was logged, using the cooked weight', () => {
+    expect(groupDishGrams(log('2026-11-27', 1000, 150), recipe)).toBeCloseTo(150);
+    const cooked = { ...recipe, cookedGrams: 600 };
+    expect(groupDishGrams(recipeEntries(cooked, 300, { date: 'd', meal: 'lunch', createdAt: 1 }), cooked)).toBeCloseTo(300);
+    expect(groupDishGrams(log('2026-11-27', 1000, 150))).toBeCloseTo(150); // recipe deleted: ingredient grams
+  });
+
+  it('scales every line together, keeping one-off edits in proportion, and moves the meal', () => {
+    const lines = log('2026-11-27', 1000, 300);
+    lines[0] = { ...lines[0], grams: 250 }; // edited by hand
+    const scaled = scaleGroup(lines, 1.5, 'dinner');
+    expect(scaled.map((e) => e.grams)).toEqual([375, 150]);
+    expect(scaled[1].quantity).toBe(1.5);
+    expect(scaled.every((e) => e.meal === 'dinner' && e.group === lines[0].group)).toBe(true);
   });
 });
