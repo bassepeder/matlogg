@@ -123,7 +123,7 @@ export function AddView({ date, meal, initialQuery }: { date: string; meal: Meal
           <button onClick={() => push(newFoodPath({ date, meal, name: q.trim() || undefined }))}>
             <Icon name="edit" /> {t('add.create')}
           </button>
-          <button onClick={() => push(`/recipe/new?${new URLSearchParams({ date, meal })}`)}>
+          <button onClick={() => push(`/recipes/${date}/${meal}`)}>
             <Icon name="recipe" /> {t('add.recipe')}
           </button>
           <button onClick={() => push(`/quick/${date}/${meal}`)}>
