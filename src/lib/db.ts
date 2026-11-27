@@ -40,15 +40,33 @@ export async function recentFoods(scanLimit = 500): Promise<RecentFood[]> {
     // Quick adds and ingredients from shared recipes (no food id) have no food to log again.
     if (entry.source === 'quick' || !entry.foodId) continue;
     const seen = byFood.get(entry.foodId);
-    if (seen) seen.count++;
-    else byFood.set(entry.foodId, { entry, count: 1 });
+    if (!seen) byFood.set(entry.foodId, { entry, count: 1 });
+    else {
+      seen.count++;
+      // Prefer an amount the user chose over one scaled from a recipe.
+      if (seen.entry.group && !entry.group) seen.entry = entry;
+    }
   }
   return [...byFood.values()];
 }
 
+// How many times each recipe was logged, from the most recent entries.
+export async function recipeUsage(scanLimit = 3000): Promise<Map<string, number>> {
+  const latest = await db.entries.orderBy('createdAt').reverse().limit(scanLimit).toArray();
+  const groups = new Map<string, string>();
+  for (const e of latest) if (e.group && e.recipeId) groups.set(e.group, e.recipeId);
+  const counts = new Map<string, number>();
+  for (const id of groups.values()) counts.set(id, (counts.get(id) ?? 0) + 1);
+  return counts;
+}
+
 export async function copyEntries(entries: Entry[], date: string): Promise<void> {
   const now = Date.now();
-  await db.entries.bulkAdd(entries.map(({ id: _id, ...e }, i) => ({ ...e, date, createdAt: now + i })));
+  const groups = new Map<string, string>();
+  const regroup = (g: string) => groups.get(g) ?? groups.set(g, `${g.split('@')[0]}@${now}-${groups.size}`).get(g)!;
+  await db.entries.bulkAdd(
+    entries.map(({ id: _id, ...e }, i) => ({ ...e, date, createdAt: now + i, ...(e.group ? { group: regroup(e.group) } : {}) })),
+  );
 }
 
 // Yesterday's entries that are not already in `already`, matched by food, name and amount.

@@ -148,7 +148,7 @@ export function LogView(props: Props) {
       createdAt: entry?.createdAt ?? Date.now(),
     };
     if (entry?.id != null) {
-      await db.entries.put({ ...record, id: entry.id });
+      await db.entries.put({ ...entry, ...record, id: entry.id });
     } else if (current.ingredients?.length) {
       // A recipe goes in as its ingredients, so the meal shows what was in it.
       const sources = new Map<string, FoodSource>();

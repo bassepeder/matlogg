@@ -76,6 +76,8 @@ const en = {
   'diary.addFood': 'Add food',
   'diary.copyYesterday': 'Copy {count} from yesterday · {kcal} kcal',
   'diary.delete': 'Delete',
+  'diary.fromRecipe': 'From {name}',
+  'diary.deleteRecipe': 'Delete all of {name}',
   'diary.deleted': 'Deleted “{name}”',
   'diary.undo': 'Undo',
 
@@ -373,6 +375,8 @@ const nb: Record<MessageKey, string> = {
   'diary.addFood': 'Legg til mat',
   'diary.copyYesterday': 'Kopier {count} fra i går · {kcal} kcal',
   'diary.delete': 'Slett',
+  'diary.fromRecipe': 'Fra {name}',
+  'diary.deleteRecipe': 'Slett hele {name}',
   'diary.deleted': 'Slettet «{name}»',
   'diary.undo': 'Angre',
 

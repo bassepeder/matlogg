@@ -2,25 +2,27 @@ import { useLiveQuery } from 'dexie-react-hooks';
 import { useMemo, useState } from 'react';
 import { Icon } from '../components/Icon';
 import { TopBar } from '../components/Layout';
-import { db } from '../lib/db';
+import { db, recipeUsage } from '../lib/db';
 import { t } from '../lib/i18n';
 import { fmtKcal } from '../lib/nutrition';
 import { push } from '../lib/router';
+import { buildIndex, searchFoods } from '../lib/search';
 import { mealInSentence, type Food, type MealId } from '../lib/types';
 import { useMeals } from '../lib/hooks';
 import { logPath } from './AddView';
 
-// Saved recipes to log from, newest first. Creating one lives under "My foods"; the link here is a shortcut.
+// Saved recipes to log from, most eaten first, then newest. Creating one lives under "My foods"; the link here is a shortcut.
 export function RecipesView({ date, meal }: { date: string; meal: MealId }) {
   const meals = useMeals();
   const recipes = useLiveQuery(() => db.foods.filter((f) => f.source === 'recipe').toArray(), []);
+  const usage = useLiveQuery(() => recipeUsage(), []);
   const [q, setQ] = useState('');
+  const index = useMemo(() => buildIndex(recipes ?? []), [recipes]);
   const shown = useMemo(() => {
-    const needle = q.trim().toLocaleLowerCase('nb');
-    return (recipes ?? [])
-      .filter((r) => !needle || r.name.toLocaleLowerCase('nb').includes(needle))
-      .sort((a, b) => (b.updatedAt ?? 0) - (a.updatedAt ?? 0));
-  }, [recipes, q]);
+    if (q.trim()) return searchFoods(index, q, { limit: 200 });
+    const used = (r: Food) => usage?.get(r.id) ?? 0;
+    return [...(recipes ?? [])].sort((a, b) => used(b) - used(a) || (b.updatedAt ?? 0) - (a.updatedAt ?? 0));
+  }, [recipes, usage, index, q]);
   const newRecipe = () => push(`/recipe/new?${new URLSearchParams({ date, meal })}`);
 
   return (

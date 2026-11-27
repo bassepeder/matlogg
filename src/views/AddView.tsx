@@ -10,7 +10,7 @@ import type { LookupResult } from '../lib/lookup';
 import { fmt } from '../lib/nutrition';
 import { push, replace } from '../lib/router';
 import { buildIndex, searchFoods } from '../lib/search';
-import { mealLabel, mealOptions, type Food, type MealId } from '../lib/types';
+import { mealLabel, mealOptions, type Entry, type Food, type MealId } from '../lib/types';
 import { amountLabel, entryTitle } from './DiaryView';
 
 export function logPath(date: string, meal: MealId, foodId: string, preset?: { n: number; u: string }) {
@@ -40,6 +40,17 @@ export function MealSelect({ value, onChange }: { value: MealId; onChange: (m: M
       </select>
     </span>
   );
+}
+
+// The amount a recent food is offered with. A line scaled from a recipe (say 66.7 g) is rounded
+// to the nearest 5 g or half unit; amounts the user chose are kept as they were.
+export function recentAmount(e: Entry): Entry {
+  if (!e.group) return e;
+  if (e.unitLabel && e.quantity != null && e.quantity > 0) {
+    const quantity = Math.max(0.5, Math.round(e.quantity * 2) / 2);
+    return { ...e, quantity, grams: quantity * (e.unitGrams ?? e.grams / e.quantity) };
+  }
+  return { ...e, grams: Math.max(5, Math.round(e.grams / 5) * 5) };
 }
 
 const EMPTY_FOODS: Food[] = [];
@@ -138,7 +149,9 @@ export function AddView({ date, meal, initialQuery }: { date: string; meal: Meal
             <section>
               <h3 className="section-title">{t('add.recent')}</h3>
               <ul className="list card">
-                {recent.slice(0, 30).map(({ entry }) => (
+                {recent.slice(0, 30).map(({ entry: logged }) => {
+                  const entry = recentAmount(logged);
+                  return (
                   <li key={entry.foodId}>
                     <button
                       className="row"
@@ -164,7 +177,8 @@ export function AddView({ date, meal, initialQuery }: { date: string; meal: Meal
                       </span>
                     </button>
                   </li>
-                ))}
+                  );
+                })}
               </ul>
             </section>
           ) : (

@@ -49,6 +49,7 @@ export function recipeEntries(
   grams: number,
   base: Pick<Entry, 'date' | 'meal' | 'createdAt'>,
   sourceOf: (foodId: string) => FoodSource | undefined = () => undefined,
+  group: string = `${recipe.id}@${base.createdAt}`,
 ): Entry[] {
   const ingredients = recipe.ingredients ?? [];
   const weight = recipeWeight(ingredients, recipe.cookedGrams);
@@ -67,5 +68,8 @@ export function recipeEntries(
     unitGrams: ing.unitLabel && ing.quantity != null ? ing.unitGrams : undefined,
     per100: ing.per100,
     createdAt: base.createdAt + i,
+    group,
+    recipeId: recipe.id,
+    recipeName: recipe.name,
   }));
 }

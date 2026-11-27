@@ -7,7 +7,7 @@ import { Summary } from '../components/Summary';
 import { SwipeRow } from '../components/SwipeRow';
 import { addDays, dayLabel, mealForTime, todayISO } from '../lib/dates';
 import { copyEntries, DEFAULT_SETTINGS, db, notYetCopied } from '../lib/db';
-import { mealsOf, useSettingsState } from '../lib/hooks';
+import { mealsOf, useSettingsState, useToday } from '../lib/hooks';
 import { portionLabel, t } from '../lib/i18n';
 import { entryNutrients, fmt, fmtKcal, resolveGoals, sum } from '../lib/nutrition';
 import { push, replace } from '../lib/router';
@@ -23,6 +23,26 @@ export function amountLabel(e: Entry): string {
   return `${fmt(e.grams)} g`;
 }
 
+// Splits a meal's entries into single lines and recipe groups, in the order they were logged.
+export function groupEntries(list: Entry[]): (Entry | Entry[])[] {
+  const out: (Entry | Entry[])[] = [];
+  const groups = new Map<string, Entry[]>();
+  for (const e of list) {
+    if (!e.group) {
+      out.push(e);
+      continue;
+    }
+    const g = groups.get(e.group);
+    if (g) g.push(e);
+    else {
+      const fresh = [e];
+      groups.set(e.group, fresh);
+      out.push(fresh);
+    }
+  }
+  return out;
+}
+
 export function DiaryView({ date }: { date: string }) {
   const settings = useSettingsState();
   const entries = useLiveQuery(() => db.entries.where('date').equals(date).sortBy('createdAt'), [date]);
@@ -33,26 +53,27 @@ export function DiaryView({ date }: { date: string }) {
   const orphanMeals = [...new Set((entries ?? []).map((e) => e.meal))].filter((id) => !meals.some((m) => m.id === id));
   const sections: MealId[] = [...meals.map((m) => m.id), ...orphanMeals];
   const totals = sum((entries ?? []).map(entryNutrients));
-  const isToday = date === todayISO();
+  const isToday = date === useToday();
   const [calendarOpen, setCalendarOpen] = useState(false);
   const yesterday = useLiveQuery(() => db.entries.where('date').equals(addDays(date, -1)).sortBy('createdAt'), [date]);
 
-  const [undo, setUndo] = useState<Entry | null>(null);
+  const [undo, setUndo] = useState<{ entries: Entry[]; name: string } | null>(null);
   useEffect(() => {
     if (!undo) return;
     const timer = setTimeout(() => setUndo(null), 6000);
     return () => clearTimeout(timer);
   }, [undo]);
 
-  async function remove(e: Entry) {
-    if (e.id == null) return;
-    await db.entries.delete(e.id);
-    setUndo(e);
+  async function remove(list: Entry[], name: string) {
+    const ids = list.map((e) => e.id).filter((id): id is number => id != null);
+    if (!ids.length) return;
+    await db.entries.bulkDelete(ids);
+    setUndo({ entries: list, name });
   }
 
   async function restore() {
     if (!undo) return;
-    await db.entries.put(undo);
+    await db.entries.bulkPut(undo.entries);
     setUndo(null);
   }
 
@@ -108,18 +129,25 @@ export function DiaryView({ date }: { date: string }) {
               )}
               {list.length > 0 && (
                 <ul className="list">
-                  {list.map((e) => {
-                    const sub = [e.brand, amountLabel(e)].filter(Boolean).join(' · ');
+                  {groupEntries(list).map((item) => {
+                    if (!Array.isArray(item)) return <EntryRow key={item.id} e={item} onDelete={() => remove([item], entryTitle(item))} />;
+                    const name = item[0].recipeName ?? '';
                     return (
-                      <SwipeRow key={e.id} deleteLabel={t('diary.delete')} onDelete={() => remove(e)}>
-                        <button className="row" onClick={() => push(`/entry/${e.id}`)}>
-                          <span className="row-main">
-                            <span className="row-title">{entryTitle(e)}</span>
-                            {sub && <span className="row-sub">{sub}</span>}
-                          </span>
-                          <span className="row-value">{fmtKcal(entryNutrients(e).kcal)}</span>
-                        </button>
-                      </SwipeRow>
+                      <li key={item[0].group} className="recipe-group">
+                        <ul className="list">
+                          <SwipeRow deleteLabel={t('diary.deleteRecipe', { name })} onDelete={() => remove(item, name)}>
+                            <div className="row group-head">
+                              <span className="row-main">
+                                <span className="row-sub">{t('diary.fromRecipe', { name })}</span>
+                              </span>
+                              <span className="row-sub">{fmtKcal(sum(item.map(entryNutrients)).kcal)} kcal</span>
+                            </div>
+                          </SwipeRow>
+                          {item.map((e) => (
+                            <EntryRow key={e.id} e={e} inGroup onDelete={() => remove([e], entryTitle(e))} />
+                          ))}
+                        </ul>
+                      </li>
                     );
                   })}
                 </ul>
@@ -143,7 +171,7 @@ export function DiaryView({ date }: { date: string }) {
 
       {undo && (
         <div className="snackbar" role="status">
-          <span>{t('diary.deleted', { name: entryTitle(undo) })}</span>
+          <span>{t('diary.deleted', { name: undo.name })}</span>
           <button onClick={restore}>{t('diary.undo')}</button>
         </div>
       )}
@@ -157,5 +185,20 @@ export function DiaryView({ date }: { date: string }) {
       </button>
       <BottomNav active="diary" />
     </>
+  );
+}
+
+function EntryRow({ e, inGroup, onDelete }: { e: Entry; inGroup?: boolean; onDelete: () => void }) {
+  const sub = [e.brand, amountLabel(e)].filter(Boolean).join(' · ');
+  return (
+    <SwipeRow deleteLabel={t('diary.delete')} onDelete={onDelete}>
+      <button className={inGroup ? 'row in-group' : 'row'} onClick={() => push(`/entry/${e.id}`)}>
+        <span className="row-main">
+          <span className="row-title">{entryTitle(e)}</span>
+          {sub && <span className="row-sub">{sub}</span>}
+        </span>
+        <span className="row-value">{fmtKcal(entryNutrients(e).kcal)}</span>
+      </button>
+    </SwipeRow>
   );
 }

@@ -1487,3 +1487,25 @@ textarea {
     animation: none;
   }
 }
+
+/* Ingredients logged from one recipe, under a small header that swipes to delete them all. */
+.row.group-head {
+  min-height: 0;
+  padding-top: 10px;
+  padding-bottom: 0;
+}
+
+.row.group-head .row-sub {
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.recipe-group li + li .row {
+  border-top: none;
+}
+
+.row.in-group {
+  padding-left: 28px;
+}

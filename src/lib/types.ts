@@ -106,6 +106,11 @@ export interface Entry {
   unitGrams?: number;
   per100: Nutrients;
   createdAt: number;
+  // Set on ingredients logged from a recipe. `group` is shared by the lines of one logging, so the
+  // diary can show and delete them together; `recipeId` counts how often each recipe is eaten.
+  group?: string;
+  recipeId?: string;
+  recipeName?: string;
 }
 
 export interface Goals {
