@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { buildRecipeFood, rawWeight, recipeTotals } from './recipe';
+import { buildRecipeFood, rawWeight, recipeEntries, recipeTotals } from './recipe';
 import { decodeFood, encodeFood } from './share';
 import type { Ingredient } from './types';
 
@@ -41,5 +41,29 @@ describe('recipes', () => {
     expect(back.ingredients?.map((i) => i.foodId)).toEqual(['mvt:01.100', 'mvt:13.001', '']);
     expect(back.ingredients?.[1]).toMatchObject({ name: 'Eple', quantity: 1, unitLabel: 'stk', grams: 150 });
     expect(back.per100.kcal).toBeCloseTo(food.per100.kcal);
+  });
+});
+
+describe('logging a recipe', () => {
+  const base = { date: '2026-11-27', meal: 'breakfast', createdAt: 1000 };
+
+  it('adds one entry per ingredient, scaled to the amount eaten', () => {
+    const food = buildRecipeFood({ id: 'recipe:1', name: 'Bowl', ingredients, servings: 2 });
+    const entries = recipeEntries(food, 185, base, (id) => (id === 'custom:pb' ? 'custom' : undefined));
+    expect(entries.map((x) => [x.name, x.grams])).toEqual([
+      ['Cottage cheese', 100],
+      ['Eple', 75],
+      ['Peanøttsmør', 10],
+    ]);
+    expect(entries[1]).toMatchObject({ quantity: 0.5, unitLabel: 'stk', unitGrams: 150, source: 'matvaretabellen' });
+    expect(entries.every((x) => x.date === base.date && x.meal === 'breakfast')).toBe(true);
+    expect(entries.map((x) => x.createdAt)).toEqual([1000, 1001, 1002]);
+    const kcal = entries.reduce((k, x) => k + (x.per100.kcal * x.grams) / 100, 0);
+    expect(kcal).toBeCloseTo((food.per100.kcal * 185) / 100);
+  });
+
+  it('scales by cooked weight when the recipe has one', () => {
+    const food = buildRecipeFood({ id: 'recipe:2', name: 'Bowl', ingredients, servings: 1, cookedGrams: 740 });
+    expect(recipeEntries(food, 370, base).map((x) => x.grams)).toEqual([100, 75, 10]);
   });
 });

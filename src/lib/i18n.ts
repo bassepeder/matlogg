@@ -72,7 +72,7 @@ const en = {
   'unit.kcalPer100': 'kcal/100 g',
 
   'diary.addFood': 'Add food',
-  'diary.copyYesterday': 'Copy from yesterday ({count}, {kcal} kcal)',
+  'diary.copyYesterday': 'Copy {count} from yesterday · {kcal} kcal',
   'diary.delete': 'Delete',
   'diary.deleted': 'Deleted “{name}”',
   'diary.undo': 'Undo',
@@ -365,7 +365,7 @@ const nb: Record<MessageKey, string> = {
   'unit.kcalPer100': 'kcal/100 g',
 
   'diary.addFood': 'Legg til mat',
-  'diary.copyYesterday': 'Kopier fra i går ({count}, {kcal} kcal)',
+  'diary.copyYesterday': 'Kopier {count} fra i går · {kcal} kcal',
   'diary.delete': 'Slett',
   'diary.deleted': 'Slettet «{name}»',
   'diary.undo': 'Angre',

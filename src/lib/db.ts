@@ -50,6 +50,19 @@ export async function copyEntries(entries: Entry[], date: string): Promise<void>
   await db.entries.bulkAdd(entries.map(({ id: _id, ...e }, i) => ({ ...e, date, createdAt: now + i })));
 }
 
+// Yesterday's entries that are not already in `already`, matched by food, name and amount.
+const entryKey = (e: Entry) => `${e.foodId}|${e.name}|${Math.round(e.grams * 10)}`;
+
+export function notYetCopied(from: Entry[], already: Entry[]): Entry[] {
+  const left = new Map<string, number>();
+  for (const e of already) left.set(entryKey(e), (left.get(entryKey(e)) ?? 0) + 1);
+  return from.filter((e) => {
+    const n = left.get(entryKey(e)) ?? 0;
+    if (n > 0) left.set(entryKey(e), n - 1);
+    return n === 0;
+  });
+}
+
 export function newId(): string {
   return globalThis.crypto?.randomUUID?.() ?? `${Date.now().toString(36)}${Math.random().toString(36).slice(2, 10)}`;
 }

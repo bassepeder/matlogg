@@ -11,7 +11,8 @@ import { getFood } from '../lib/matvaretabellen';
 import { defaultQuantity, isNutrientUnit, unitsFor } from '../lib/units';
 import { fmt, fmtKcal, parseNum, scale, toInput } from '../lib/nutrition';
 import { backToDiary, push } from '../lib/router';
-import { mealInSentence, mealOptions, sourceLabel, type Entry, type Food, type MealId } from '../lib/types';
+import { recipeEntries } from '../lib/recipe';
+import { mealInSentence, mealOptions, sourceLabel, type Entry, type Food, type FoodSource, type MealId } from '../lib/types';
 import { QuickAddView } from './QuickAddView';
 
 export { unitsFor };
@@ -145,8 +146,20 @@ export function LogView(props: Props) {
       per100: current.per100,
       createdAt: entry?.createdAt ?? Date.now(),
     };
-    if (entry?.id != null) await db.entries.put({ ...record, id: entry.id });
-    else await db.entries.add(record);
+    if (entry?.id != null) {
+      await db.entries.put({ ...record, id: entry.id });
+    } else if (current.ingredients?.length) {
+      // A recipe goes in as its ingredients, so the meal shows what was in it.
+      const sources = new Map<string, FoodSource>();
+      for (const ing of current.ingredients) {
+        if (ing.source || sources.has(ing.foodId)) continue;
+        const f = await getFood(ing.foodId).catch(() => undefined);
+        if (f) sources.set(ing.foodId, f.source);
+      }
+      await db.entries.bulkAdd(recipeEntries(current, grams, record, (id) => sources.get(id)));
+    } else {
+      await db.entries.add(record);
+    }
     backToDiary(date);
   }
 

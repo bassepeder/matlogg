@@ -6,7 +6,7 @@ import { BottomNav } from '../components/Layout';
 import { Summary } from '../components/Summary';
 import { SwipeRow } from '../components/SwipeRow';
 import { addDays, dayLabel, mealForTime, todayISO } from '../lib/dates';
-import { copyEntries, DEFAULT_SETTINGS, db } from '../lib/db';
+import { copyEntries, DEFAULT_SETTINGS, db, notYetCopied } from '../lib/db';
 import { mealsOf, useSettingsState } from '../lib/hooks';
 import { portionLabel, t } from '../lib/i18n';
 import { entryNutrients, fmt, fmtKcal, resolveGoals, sum } from '../lib/nutrition';
@@ -89,7 +89,8 @@ export function DiaryView({ date }: { date: string }) {
         {sections.map((meal) => {
           const list = (entries ?? []).filter((e) => e.meal === meal);
           const mealTotals = sum(list.map(entryNutrients));
-          const sameAsYesterday = list.length ? [] : (yesterday ?? []).filter((e) => e.meal === meal);
+          // Yesterday's entries for this meal that are not already logged today, so a partly filled meal can still be topped up.
+          const sameAsYesterday = notYetCopied((yesterday ?? []).filter((e) => e.meal === meal), list);
           return (
             <section key={meal} className="card meal">
               <div className="meal-head">

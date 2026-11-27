@@ -1,5 +1,5 @@
-import { isISODate, mealForTime, todayISO } from './lib/dates';
-import { mealsOf, useSettingsState } from './lib/hooks';
+import { isISODate, mealForTime } from './lib/dates';
+import { mealsOf, useSettingsState, useToday } from './lib/hooks';
 import { useLang } from './lib/i18n';
 import { parseNum } from './lib/nutrition';
 import { useRoute } from './lib/router';
@@ -18,10 +18,11 @@ import { SettingsView } from './views/SettingsView';
 function View() {
   const { path, parts, query } = useRoute();
   const settings = useSettingsState();
+  const today = useToday();
   if (!settings) return null; // meals live in settings; wait so a custom meal in the URL resolves
   const meals = mealsOf(settings);
   const [section, a, b, c] = parts;
-  const date = isISODate(a) ? a : todayISO();
+  const date = isISODate(a) ? a : today;
   const meal: MealId = b && meals.some((m) => m.id === b) ? b : mealForTime(new Date(), meals);
 
   switch (section) {
@@ -58,7 +59,7 @@ function View() {
     case 'settings':
       return <SettingsView />;
     default:
-      return <DiaryView date={todayISO()} />;
+      return <DiaryView key={today} date={today} />;
   }
 }
 

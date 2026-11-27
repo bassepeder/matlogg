@@ -259,6 +259,7 @@ function AmountStep({
       foodId: food.id,
       name: food.name,
       brand: food.brand,
+      source: food.source,
       grams,
       quantity: isGrams ? undefined : quantity,
       unitLabel: isGrams ? undefined : unit.label,

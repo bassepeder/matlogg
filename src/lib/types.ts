@@ -66,6 +66,7 @@ export interface Ingredient {
   foodId: string;
   name: string;
   brand?: string;
+  source?: FoodSource;
   grams: number;
   quantity?: number;
   unitLabel?: string;
