@@ -76,6 +76,8 @@ export function LogView(props: Props) {
   const meals = useMeals();
   const [meal, setMeal] = useState<MealId>(props.meal ?? mealForTime(new Date(), meals));
   const [ready, setReady] = useState(false);
+  // The amount field as it opened for an existing entry; saving it untouched keeps the exact amount.
+  const [opened, setOpened] = useState<{ qty: string; unitIdx: number } | null>(null);
 
   useLayoutEffect(() => {
     // An entry without a food id (an ingredient from a shared recipe) has no food to wait for; it edits from its own values.
@@ -85,12 +87,10 @@ export function LogView(props: Props) {
     if (entry) {
       setMeal(entry.meal);
       const i = entry.unitLabel ? pick(entry.unitLabel, entry.unitGrams) : -1;
-      if (i > 0 && entry.quantity != null) {
-        setUnitIdx(i);
-        setQty(toInput(entry.quantity));
-      } else {
-        setQty(toInput(entry.grams));
-      }
+      const shown = i > 0 && entry.quantity != null ? { qty: toInput(entry.quantity), unitIdx: i } : { qty: toInput(entry.grams), unitIdx: 0 };
+      setUnitIdx(shown.unitIdx);
+      setQty(shown.qty);
+      setOpened(shown);
     } else if (props.preset?.n != null && pick(props.preset.u) >= 0) {
       setUnitIdx(pick(props.preset.u));
       setQty(toInput(props.preset.n));
@@ -127,8 +127,10 @@ export function LogView(props: Props) {
   }
 
   const unit = units[unitIdx] ?? units[0];
-  const quantity = parseNum(qty);
-  const grams = quantity != null && quantity > 0 ? quantity * unit.grams : 0;
+  // The field shows a rounded amount; if it was left as it opened, keep the entry's exact amount.
+  const untouched = !!entry && !!opened && qty === opened.qty && unitIdx === opened.unitIdx;
+  const quantity = untouched && entry.quantity != null && unit.label !== 'g' ? entry.quantity : parseNum(qty);
+  const grams = untouched ? entry.grams : quantity != null && quantity > 0 ? quantity * unit.grams : 0;
   const amount = scale(current.per100, grams);
   const date = entry?.date ?? props.date!;
   const canEditFood = current.source !== 'matvaretabellen' && food != null;

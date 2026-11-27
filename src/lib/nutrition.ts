@@ -79,8 +79,9 @@ export function fmtKcal(n: number): string {
   return nf(0).format(Math.round(n));
 }
 
+// Up to two decimals, so an amount like 0.33 stk or 0.47 g salt survives being opened and saved again.
 export function toInput(n: number | undefined): string {
   if (n == null) return '';
-  const s = String(Math.round(n * 10) / 10);
+  const s = String(Math.round(n * 100) / 100);
   return locale() === 'nb-NO' ? s.replace('.', ',') : s;
 }

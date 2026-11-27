@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { addDays, dayLabel, mealForTime, toISODate } from './dates';
-import { kcalFromMacros, parseNum, scale, sum } from './nutrition';
+import { kcalFromMacros, parseNum, scale, sum, toInput } from './nutrition';
 
 describe('scale', () => {
   it('scales per-100 g values to an amount', () => {
@@ -59,5 +59,14 @@ describe('dates', () => {
     expect(mealForTime(new Date(2026, 0, 1, 12, 0))).toBe('lunch');
     expect(mealForTime(new Date(2026, 0, 1, 17, 30))).toBe('dinner');
     expect(mealForTime(new Date(2026, 0, 1, 21, 0))).toBe('snacks');
+  });
+});
+
+describe('amount fields', () => {
+  it('keep two decimals, so fractional amounts survive being opened and saved', () => {
+    expect(parseNum(toInput(0.333))).toBe(0.33);
+    expect(parseNum(toInput(0.47))).toBe(0.47);
+    expect(toInput(66.6667)).toMatch(/^66[.,]67$/);
+    expect(toInput(100)).toBe('100');
   });
 });

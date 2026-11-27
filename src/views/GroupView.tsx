@@ -38,16 +38,19 @@ export function GroupView({ date, group }: { date: string; group: string }) {
   const [unitIdx, setUnitIdx] = useState(0);
   const [meal, setMeal] = useState<MealId>('');
   const [ready, setReady] = useState(false);
+  // The amount field as it opened; saving it untouched keeps every line exactly as it is.
+  const [opened, setOpened] = useState<{ qty: string; unitIdx: number } | null>(null);
 
   useLayoutEffect(() => {
     if (ready || !data || !entries.length) return;
     const serving = units.findIndex((u) => u.label === 'serving');
-    if (serving > 0) {
-      setUnitIdx(serving);
-      setQty(toInput(roundAmount(dishGrams / units[serving].grams, 'serving')));
-    } else {
-      setQty(toInput(roundAmount(dishGrams, 'g')));
-    }
+    const shown =
+      serving > 0
+        ? { qty: toInput(roundAmount(dishGrams / units[serving].grams, 'serving')), unitIdx: serving }
+        : { qty: toInput(roundAmount(dishGrams, 'g')), unitIdx: 0 };
+    setUnitIdx(shown.unitIdx);
+    setQty(shown.qty);
+    setOpened(shown);
     setMeal(entries[0].meal);
     setReady(true);
   }, [ready, data, entries, units, dishGrams]);
@@ -67,7 +70,8 @@ export function GroupView({ date, group }: { date: string; group: string }) {
   const unit = units[unitIdx] ?? units[0];
   const quantity = parseNum(qty);
   const grams = quantity != null && quantity > 0 ? quantity * unit.grams : 0;
-  const factor = dishGrams > 0 ? grams / dishGrams : 0;
+  const untouched = !!opened && qty === opened.qty && unitIdx === opened.unitIdx;
+  const factor = untouched ? 1 : dishGrams > 0 ? grams / dishGrams : 0;
   const amount = scale(total, factor * 100);
 
   async function save() {
