@@ -121,9 +121,17 @@ export interface Goals {
   carbsAuto?: boolean;
 }
 
+export interface BodySettings {
+  goalWeight?: number;
+  /** Trend weight when the goal was set, where the progress bar starts. */
+  goalStart?: number;
+  height?: number;
+}
+
 export interface Settings {
   id: 'app';
   goals: Goals;
+  body?: BodySettings;
   vetduatProxyUrl?: string;
   meals?: Meal[];
 }

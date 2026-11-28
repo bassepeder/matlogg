@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react';
 import { t } from '../lib/i18n';
 import { back, replace } from '../lib/router';
-import { Icon } from './Icon';
+import { Icon, type IconName } from './Icon';
 
 export function TopBar({ title, onBack, right }: { title: ReactNode; onBack?: () => void; right?: ReactNode }) {
   return (
@@ -15,11 +15,12 @@ export function TopBar({ title, onBack, right }: { title: ReactNode; onBack?: ()
   );
 }
 
-export type Tab = 'diary' | 'week' | 'foods' | 'settings';
+export type Tab = 'diary' | 'week' | 'body' | 'foods' | 'settings';
 
-const TABS: { id: Tab; path: string; icon: 'diary' | 'week' | 'foods' | 'settings' }[] = [
+const TABS: { id: Tab; path: string; icon: IconName }[] = [
   { id: 'diary', path: '/', icon: 'diary' },
   { id: 'week', path: '/week', icon: 'week' },
+  { id: 'body', path: '/body', icon: 'body' },
   { id: 'foods', path: '/foods', icon: 'foods' },
   { id: 'settings', path: '/settings', icon: 'settings' },
 ];

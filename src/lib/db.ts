@@ -1,16 +1,23 @@
 import Dexie, { type EntityTable } from 'dexie';
+import type { BodyEntry } from './body';
 import { DEFAULT_MEALS, type Entry, type Food, type Meal, type MealId, type Settings } from './types';
 
 export const db = new Dexie('matlogg') as Dexie & {
   entries: EntityTable<Entry, 'id'>;
   foods: EntityTable<Food, 'id'>;
   settings: EntityTable<Settings, 'id'>;
+  body: EntityTable<BodyEntry, 'date'>;
 };
 
 db.version(1).stores({
   entries: '++id, date, createdAt, foodId',
   foods: 'id, ean, updatedAt',
   settings: 'id',
+});
+
+// Weight and measurements, one record per day.
+db.version(2).stores({
+  body: 'date',
 });
 
 export const DEFAULT_SETTINGS: Settings = {
