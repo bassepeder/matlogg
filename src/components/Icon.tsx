@@ -18,6 +18,9 @@ const PATHS = {
   recipe: 'M3 11h18M5 11a7 7 0 0 0 14 0M12 3v3M8 4l1 2M16 4l-1 2M7 21h10',
   copy: 'M8 8h11a1 1 0 0 1 1 1v11a1 1 0 0 1-1 1H8a1 1 0 0 1-1-1V9a1 1 0 0 1 1-1zM4 16V4a1 1 0 0 1 1-1h11',
   calendar: 'M8 2v4M16 2v4M3 10h18M5 4h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2z',
+  body: 'M5 3h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2zM7.5 10.5a4.5 4.5 0 0 1 9 0M12 10.5l1.8-2.6',
+  flag: 'M5 21V4M5 4h11l-2 4 2 4H5',
+  minus: 'M5 12h14',
 } as const;
 
 export type IconName = keyof typeof PATHS;

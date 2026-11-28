@@ -1644,3 +1644,377 @@ textarea {
   color: var(--danger);
   text-align: right;
 }
+
+/* Body: weight and measurements */
+
+.bottom-nav span {
+  max-width: 100%;
+  padding: 0 2px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.big-number .unit {
+  font-size: 18px;
+  font-weight: 600;
+  letter-spacing: 0;
+  color: var(--muted);
+}
+
+.toward-goal {
+  color: var(--primary) !important;
+}
+
+.add-link.inset {
+  margin: 0 -16px -10px;
+}
+
+.goal-progress {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.goal-ends {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+}
+
+.goal-line {
+  margin: 4px 0 0;
+  font-size: 14px;
+}
+
+.body-trend .hint {
+  margin-top: 10px;
+}
+
+.chart-readout {
+  display: flex;
+  flex-direction: column;
+}
+
+.chart-metric {
+  font-size: 13px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--muted);
+}
+
+.chart-readout strong {
+  font-size: 28px;
+  font-weight: 750;
+  line-height: 1.15;
+  letter-spacing: -0.01em;
+  font-variant-numeric: tabular-nums;
+}
+
+.chart-readout strong small {
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: 0;
+  color: var(--muted);
+}
+
+.chart-readout > span:last-child {
+  min-height: 1.4em;
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+}
+
+.chart-wrap {
+  position: relative;
+  height: 190px;
+  margin: 8px -4px 0;
+}
+
+.chart-wrap svg {
+  display: block;
+  touch-action: pan-y;
+  -webkit-user-select: none;
+  user-select: none;
+  outline: none;
+  cursor: crosshair;
+}
+
+.chart-wrap svg:focus-visible {
+  outline: 2px solid var(--primary);
+  border-radius: 8px;
+}
+
+.chart-grid {
+  stroke: var(--border);
+  stroke-width: 1;
+}
+
+.chart-tick {
+  fill: var(--muted);
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+}
+
+.chart-line {
+  fill: none;
+  stroke: var(--primary);
+  stroke-width: 2.5;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+}
+
+.chart-dot {
+  fill: var(--surface);
+  stroke: var(--muted);
+  stroke-width: 1.5;
+}
+
+.chart-dot.solid {
+  fill: var(--primary);
+  stroke: var(--surface);
+}
+
+.chart-goal {
+  stroke: var(--muted);
+  stroke-width: 1.25;
+  stroke-dasharray: 4 4;
+}
+
+.chart-goal-label {
+  fill: var(--muted);
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.chart-cursor {
+  stroke: var(--text);
+  stroke-opacity: 0.3;
+  stroke-width: 1;
+}
+
+.chart-active {
+  fill: var(--text);
+  stroke: var(--surface);
+  stroke-width: 2.5;
+}
+
+.chart-active.trend {
+  fill: var(--primary);
+}
+
+.chart-empty {
+  display: grid;
+  place-items: center;
+  height: 190px;
+  margin: 8px 0 0;
+  color: var(--muted);
+  font-size: 14px;
+}
+
+.body-chart .source-filter {
+  margin-top: 8px;
+}
+
+.maint-number {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 4px 10px;
+  margin: 4px 0 8px;
+}
+
+.maint-number .big-number {
+  font-size: 34px;
+}
+
+.maint-goal {
+  margin: 0 0 8px;
+  font-size: 15px;
+}
+
+.body-delta {
+  margin-left: 8px;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.body-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding: 28px 20px 24px;
+  text-align: center;
+}
+
+.body-empty-art {
+  width: 64px;
+  height: 64px;
+  display: grid;
+  place-items: center;
+  border-radius: 20px;
+  background: var(--primary-soft);
+  color: var(--primary);
+}
+
+.body-empty h2 {
+  font-size: 20px;
+}
+
+.body-empty p {
+  margin: 0;
+  max-width: 36ch;
+  color: var(--muted);
+  font-size: 15px;
+}
+
+.body-empty .hint {
+  font-size: 13px;
+}
+
+.body-empty .btn {
+  margin-top: 6px;
+}
+
+.body-empty.compact {
+  align-items: stretch;
+  text-align: left;
+  padding: 16px;
+}
+
+.body-empty.compact h2 {
+  font-size: 17px;
+}
+
+.inline-field .input.date {
+  width: auto;
+  min-width: 160px;
+  text-align: left;
+}
+
+.weight-input {
+  display: grid;
+  grid-template-columns: 52px 1fr 52px;
+  align-items: center;
+  gap: 10px;
+  margin-top: 4px;
+}
+
+.weight-field {
+  position: relative;
+}
+
+.form .weight-field {
+  display: block;
+}
+
+.weight-field .input {
+  min-height: 76px;
+  padding: 8px 44px;
+  text-align: center;
+  font-size: 40px;
+  font-weight: 750;
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
+}
+
+.weight-field .input::placeholder {
+  color: var(--muted);
+  opacity: 0.45;
+}
+
+.weight-field > span:last-child {
+  position: absolute;
+  right: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-weight: 600;
+  color: var(--muted);
+  pointer-events: none;
+}
+
+.step {
+  width: 52px;
+  height: 52px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--surface-2);
+  color: var(--text);
+}
+
+.step:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+.step:not(:disabled):active {
+  filter: brightness(0.92);
+}
+
+.weight-meta {
+  text-align: center;
+}
+
+details.measures {
+  padding: 0;
+}
+
+details.measures summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px 16px;
+  list-style: none;
+  cursor: pointer;
+}
+
+details.measures summary::-webkit-details-marker {
+  display: none;
+}
+
+details.measures summary > span {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+details.measures summary small {
+  font-size: 13px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+details.measures summary svg {
+  flex: none;
+  color: var(--muted);
+  transition: transform 0.2s ease;
+}
+
+details.measures[open] summary svg {
+  transform: rotate(90deg);
+}
+
+.measure-grid {
+  padding: 0 16px 16px;
+}
+
+.measure-grid label {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.body-sheet {
+  padding: 14px 16px 16px;
+}
+
+.sheet-title {
+  font-size: 18px;
+}

@@ -5,6 +5,8 @@ import { parseNum } from './lib/nutrition';
 import { useRoute } from './lib/router';
 import type { MealId } from './lib/types';
 import { AddView } from './views/AddView';
+import { BodyLogView } from './views/BodyLogView';
+import { BodyView } from './views/BodyView';
 import { DiaryView } from './views/DiaryView';
 import { FoodEditView } from './views/FoodEditView';
 import { ImportView } from './views/ImportView';
@@ -53,6 +55,9 @@ function View() {
       return <GroupView key={path} date={date} group={b ?? ''} />;
     case 'week':
       return <WeekView date={date} />;
+    case 'body':
+      if (a === 'log') return <BodyLogView key={path} date={isISODate(b) ? b : undefined} />;
+      return <BodyView />;
     case 'recipes':
       return <RecipesView key={path} date={date} meal={meal} />;
     case 'recipe':
