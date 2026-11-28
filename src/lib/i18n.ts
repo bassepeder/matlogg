@@ -380,6 +380,9 @@ const en = {
   'settings.vetduatTitle': 'VetDuAt (Tradesolution EPD)',
   'settings.vetduatHint':
     'The most complete source for Norwegian grocery products (Tradesolution EPD). When set up, barcode scans try it first. Needs a proxy you host, since its API only accepts requests from vetduat.no. Paste the proxy address below.',
+  'settings.vetduatHintBuiltIn':
+    'The most complete source for Norwegian grocery products (Tradesolution EPD), used in search and tried first for barcode scans. Works out of the box through the app’s own proxy. To use a proxy you host yourself, paste its address below; leave it empty to use the built-in one.',
+  'settings.vetduatBuiltIn': 'Using the built-in VetDuAt proxy.',
   'settings.vetduatUrl': 'Proxy address',
   'settings.vetduatUrlAria': 'VetDuAt proxy address',
   'settings.vetduatSaved': 'VetDuAt proxy saved.',
@@ -788,6 +791,9 @@ const nb: Record<MessageKey, string> = {
   'settings.vetduatTitle': 'VetDuAt (Tradesolution EPD)',
   'settings.vetduatHint':
     'Den mest komplette kilden for norske dagligvarer (Tradesolution EPD). Når den er satt opp, prøves den først ved strekkodeskanning. Krever en proxy du selv drifter, siden API-et bare godtar forespørsler fra vetduat.no. Lim inn proxy-adressen under.',
+  'settings.vetduatHintBuiltIn':
+    'Den mest komplette kilden for norske dagligvarer (Tradesolution EPD), brukt i søk og prøvd først ved strekkodeskanning. Virker uten oppsett via appens egen proxy. Vil du bruke en proxy du drifter selv, limer du inn adressen under; la feltet stå tomt for å bruke den innebygde.',
+  'settings.vetduatBuiltIn': 'Bruker den innebygde VetDuAt-proxyen.',
   'settings.vetduatUrl': 'Proxy-adresse',
   'settings.vetduatUrlAria': 'Proxy-adresse for VetDuAt',
   'settings.vetduatSaved': 'VetDuAt-proxyen er lagret.',

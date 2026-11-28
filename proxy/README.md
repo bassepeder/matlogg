@@ -32,7 +32,12 @@ Wrangler prints a URL like `https://vetduat-proxy.<you>.workers.dev`.
 
 ## Use
 
-Open Matlogg → **Settings → VetDuAt**, paste that URL, **Save**, then **Test**.
-Product search and barcode scans now use VetDuAt.
+The app at `bassepeder.github.io` uses its built-in proxy (`BUILT_IN_PROXY` in
+`src/lib/lookup.ts`), so its users need no setup. Elsewhere (local dev, forks hosted
+on another origin) there is no default: open Matlogg → **Settings → VetDuAt**, paste
+your proxy's URL, **Save**, then **Test**. A URL saved in Settings always wins over the
+built-in one; clear the field to go back to it.
 
-To lock the proxy to your own app, set `ALLOW_ORIGINS` in `vetduat-worker.js`.
+Set `ALLOW_ORIGINS` in `vetduat-worker.js` to your own app's origin. It only stops
+browsers on other sites from reading responses; the worker still forwards requests
+from scripts, so keep an eye on the free tier's 100 000 requests a day.

@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useSettings } from '../lib/hooks';
 import { t } from '../lib/i18n';
-import type { LookupResult } from '../lib/lookup';
+import { vetduatProxyUrl, type LookupResult } from '../lib/lookup';
 import { useStoreSearch, withoutSaved, type RemoteSource, type SourceView } from '../lib/storeSearch';
 import type { Food } from '../lib/types';
 import { FoodRow, Thumb } from './FoodRow';
@@ -59,7 +59,7 @@ function SkeletonRows({ rows = 3 }: { rows?: number }) {
 
 export function SearchResults({ q, results, tableLoaded, onPickFood, onPickStore, allowPartial }: Props) {
   const settings = useSettings();
-  const hasProxy = !!settings.vetduatProxyUrl;
+  const hasProxy = !!vetduatProxyUrl(settings);
   const [filter, setFilter] = useState<Filter>('all');
   const wants = (id: GroupId) => filter === 'all' || filter === id;
   const store = useStoreSearch(q, settings, { vetduat: wants('vetduat'), off: wants('off') });

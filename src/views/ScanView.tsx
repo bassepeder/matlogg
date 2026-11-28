@@ -4,6 +4,7 @@ import { TopBar } from '../components/Layout';
 import { useSettings } from '../lib/hooks';
 import { t } from '../lib/i18n';
 import { findByBarcode } from '../lib/barcode';
+import { vetduatProxyUrl } from '../lib/lookup';
 import { replace } from '../lib/router';
 import type { MealId } from '../lib/types';
 import { logPath, newFoodPath } from './AddView';
@@ -25,7 +26,7 @@ export function ScanView({ date, meal }: { date: string; meal: MealId }) {
     setStatus({ kind: 'looking', code });
 
     try {
-      const result = await findByBarcode(code, settings.vetduatProxyUrl);
+      const result = await findByBarcode(code, vetduatProxyUrl(settings));
       if (result.food) return replace(logPath(date, meal, result.food.id));
       if (result.warnings?.length && !result.partial?.name) {
         return setStatus({ kind: 'notfound', code, warnings: result.warnings });
@@ -102,7 +103,7 @@ export function ScanView({ date, meal }: { date: string; meal: MealId }) {
           </div>
         </form>
 
-        {!settings.vetduatProxyUrl && (
+        {!vetduatProxyUrl(settings) && (
           <p className="hint">{t('scan.offOnly')}</p>
         )}
       </main>

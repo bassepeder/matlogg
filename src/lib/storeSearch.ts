@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { LookupError, searchOpenFoodFacts, searchVetduat, type LookupResult } from './lookup';
+import { LookupError, searchOpenFoodFacts, searchVetduat, vetduatProxyUrl, type LookupResult } from './lookup';
 import { t } from './i18n';
 import type { Food, Settings } from './types';
 
@@ -52,7 +52,7 @@ type Entry = { query: string } & (
 
 export function useStoreSearch(q: string, settings: Settings, wanted: Record<RemoteSource, boolean>) {
   const query = q.trim();
-  const proxy = settings.vetduatProxyUrl;
+  const proxy = vetduatProxyUrl(settings);
   const active: Record<RemoteSource, boolean> = { vetduat: wanted.vetduat && !!proxy, off: wanted.off };
   const canSearch = query.length >= MIN_CHARS;
   const [state, setState] = useState<Partial<Record<RemoteSource, Entry>>>({});

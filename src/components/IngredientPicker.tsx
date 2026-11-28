@@ -4,6 +4,7 @@ import { findByBarcode } from '../lib/barcode';
 import { db, recentFoods, type RecentFood } from '../lib/db';
 import { useMatvaretabellen, useSettings } from '../lib/hooks';
 import { portionLabel, t } from '../lib/i18n';
+import { vetduatProxyUrl } from '../lib/lookup';
 import { getFood } from '../lib/matvaretabellen';
 import { fmt, fmtKcal, parseNum, scale, toInput } from '../lib/nutrition';
 import { buildIndex, searchFoods } from '../lib/search';
@@ -173,7 +174,7 @@ function ScanStep({ onFound }: { onFound: (f: Food) => void }) {
     setScanning(false);
     setMessage({ text: t('scan.looking', { code }) });
     try {
-      const result = await findByBarcode(code, settings.vetduatProxyUrl);
+      const result = await findByBarcode(code, vetduatProxyUrl(settings));
       if (result.food) return onFound(result.food);
       setMessage({ text: t('ingredient.notFound', { code }), error: true });
     } catch (e) {
@@ -224,7 +225,7 @@ function ScanStep({ onFound }: { onFound: (f: Food) => void }) {
           </button>
         </div>
       </form>
-      {!settings.vetduatProxyUrl && <p className="hint">{t('scan.offOnly')}</p>}
+      {!vetduatProxyUrl(settings) && <p className="hint">{t('scan.offOnly')}</p>}
     </main>
   );
 }

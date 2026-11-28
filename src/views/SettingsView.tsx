@@ -5,7 +5,7 @@ import { downloadBlob, exportBackup, importBackup, parseBackup } from '../lib/ba
 import { countMealEntries, deleteAllData, removeMeal, saveMeals, saveSettings } from '../lib/db';
 import { mealsOf, useMatvaretabellen, useSettings } from '../lib/hooks';
 import { detectLang, getLangSetting, setLangSetting, t, type LangSetting } from '../lib/i18n';
-import { lookupVetduat } from '../lib/lookup';
+import { defaultVetduatProxyUrl, lookupVetduat } from '../lib/lookup';
 import { carbsFromRest, fmt, kcalFromMacros, parseNum, toInput } from '../lib/nutrition';
 import { getTheme, setTheme, type Theme } from '../lib/theme';
 import { builtInMealLabel, isBuiltInMeal, mealLabel, type Goals, type Meal, type MealId } from '../lib/types';
@@ -263,16 +263,23 @@ export function SettingsView() {
     navigator.storage?.persisted?.().then(setPersisted, () => setPersisted(null));
   }, []);
 
+  // The field holds only a proxy of the user's own; left empty, the built-in one (if any) is used.
+  const builtInProxy = defaultVetduatProxyUrl();
   const proxyUrl = proxy ?? settings.vetduatProxyUrl ?? '';
+  const activeProxy = proxyUrl.trim() || builtInProxy;
 
   async function saveProxy() {
-    await saveSettings({ vetduatProxyUrl: proxyUrl.trim() || undefined });
+    const own = proxyUrl.trim();
+    await saveSettings({ vetduatProxyUrl: own || undefined });
     setProxy(null);
-    setMessage({ card: 'vetduat', text: proxyUrl.trim() ? t('settings.vetduatSaved') : t('settings.vetduatRemoved') });
+    setMessage({
+      card: 'vetduat',
+      text: own ? t('settings.vetduatSaved') : builtInProxy ? t('settings.vetduatBuiltIn') : t('settings.vetduatRemoved'),
+    });
   }
 
   async function testProxy() {
-    const url = proxyUrl.trim();
+    const url = activeProxy;
     if (!url) return;
     setMessage({ card: 'vetduat', text: t('settings.testing') });
     try {
@@ -376,7 +383,7 @@ export function SettingsView() {
 
         <h3 className="section-title">{t('settings.vetduatTitle')}</h3>
         <section className="card form">
-          <p className="hint">{t('settings.vetduatHint')}</p>
+          <p className="hint">{t(builtInProxy ? 'settings.vetduatHintBuiltIn' : 'settings.vetduatHint')}</p>
           <input
             className="input"
             value={proxyUrl}
@@ -384,7 +391,7 @@ export function SettingsView() {
               setProxy(e.target.value);
               if (message?.card === 'vetduat') setMessage(null);
             }}
-            placeholder="https://your-proxy.workers.dev"
+            placeholder={builtInProxy || 'https://your-proxy.workers.dev'}
             autoComplete="off"
             spellCheck={false}
             inputMode="url"
@@ -394,7 +401,7 @@ export function SettingsView() {
             <button className="btn primary" disabled={proxy == null} onClick={saveProxy}>
               {t('settings.save')}
             </button>
-            <button className="btn secondary" disabled={!proxyUrl.trim()} onClick={testProxy}>
+            <button className="btn secondary" disabled={!activeProxy} onClick={testProxy}>
               {t('settings.test')}
             </button>
           </div>

@@ -13,7 +13,7 @@ Food and calorie diary for Norway. Installable web app, data stays on the device
 
 Open [bassepeder.github.io/matlogg](https://bassepeder.github.io/matlogg/) and choose **Add to Home Screen** (Safari) or **Install app** (Chrome).
 
-To search and scan Norwegian grocery products, deploy the [VetDuAt proxy](proxy/README.md) and paste its URL in Settings.
+Norwegian grocery search and barcode scans work out of the box through the app's own [VetDuAt proxy](proxy/README.md). If you host Matlogg elsewhere, deploy your own proxy and paste its URL in Settings.
 
 ## Credits
 

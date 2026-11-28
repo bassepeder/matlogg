@@ -8,7 +8,28 @@ import {
   parseVetduatProduct,
   searchOpenFoodFacts,
   searchVetduat,
+  defaultVetduatProxyUrl,
+  vetduatProxyUrl,
 } from './lookup';
+
+const APP_ORIGIN = 'https://bassepeder.github.io';
+
+describe('vetduatProxyUrl', () => {
+  it('offers the built-in proxy only on the origin the worker allows', () => {
+    expect(defaultVetduatProxyUrl('http://localhost:5173')).toBe('');
+    expect(defaultVetduatProxyUrl('https://someone.github.io')).toBe('');
+    expect(defaultVetduatProxyUrl(undefined)).toBe('');
+    expect(defaultVetduatProxyUrl(APP_ORIGIN)).toBe('https://vetduat-proxy.bassepeder.workers.dev');
+    expect(vetduatProxyUrl({}, APP_ORIGIN)).toBe('https://vetduat-proxy.bassepeder.workers.dev');
+    expect(vetduatProxyUrl({ vetduatProxyUrl: '' }, APP_ORIGIN)).toBe('https://vetduat-proxy.bassepeder.workers.dev');
+  });
+
+  it('prefers a proxy set in Settings, and treats a blank one as unset', () => {
+    expect(vetduatProxyUrl({ vetduatProxyUrl: ' https://mine.workers.dev ' }, APP_ORIGIN)).toBe('https://mine.workers.dev');
+    expect(vetduatProxyUrl({ vetduatProxyUrl: 'https://mine.workers.dev' }, 'http://localhost:5173')).toBe('https://mine.workers.dev');
+    expect(vetduatProxyUrl({ vetduatProxyUrl: '  ' }, 'http://localhost:5173')).toBe('');
+  });
+});
 
 // Shape copied from a real Open Food Facts response.
 const offProduct = {

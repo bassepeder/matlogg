@@ -294,6 +294,20 @@ function normalizeProxy(base: string): string {
   return base.trim().replace(/\/+$/, '');
 }
 
+// The app's own VetDuAt proxy (proxy/), used unless Settings names another. The worker only answers
+// the origin in its ALLOW_ORIGINS, so it is only offered there: local dev and forks deployed
+// elsewhere start without a proxy and set up their own, as before.
+const BUILT_IN_PROXY = { url: 'https://vetduat-proxy.bassepeder.workers.dev', origin: 'https://bassepeder.github.io' };
+
+export function defaultVetduatProxyUrl(origin: string | undefined = globalThis.location?.origin): string {
+  return origin === BUILT_IN_PROXY.origin ? BUILT_IN_PROXY.url : '';
+}
+
+/** The proxy to use: the one set in Settings, else the built-in one; '' means VetDuAt is off. */
+export function vetduatProxyUrl(settings: { vetduatProxyUrl?: string }, origin?: string): string {
+  return settings.vetduatProxyUrl?.trim() || defaultVetduatProxyUrl(origin);
+}
+
 export const SEARCH_TIMEOUT_MS = 10_000;
 
 type FetchMessages = {
